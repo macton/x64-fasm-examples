@@ -35,6 +35,7 @@ PE_HEADER:
   ;    u16 e_res[3]            
   ;    u16 e_oemid             u16 SizeOfOptionalHeader
   ;    u16 e_oeminfo           u16 Characteristics
+  ;
   ;                         IMAGE_OPTIONAL_HEADER:
   ;    u16 e_res2[0]           u16 Magic
   ;    u16 e_res2[1]           u8  MajorLinkerVersion
@@ -71,7 +72,7 @@ PE_HEADER:
   ;                            u32 NumberOfRvaAndSizes
   ;                            IMAGE_DATA_DIRECTORY DataDirectory[2];
   
-  ; Nothing aliasing the IMAGE_DOS_HEADER is read, except e_lfanew
+  ; Nothing aliasing the IMAGE_DOS_HEADER matters (don't care if DOS stub actually works), except e_lfanew 
   ; So:
   ;    u32 e_lfanew == u32 BaseOfCode
   ;    -> Both point to the top of IMAGE_NT_HEADERS at offset 0x10
