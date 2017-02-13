@@ -1,0 +1,291 @@
+Calling conventions comparison
+From: http://www.purebasic.fr/english/viewtopic.php?p=476926#p476926
+
+0 parameters:
+Code:
+WIN-x86                   LNX-x86                   WIN-x64                   LNX-x64                   MAC-x64
+  call Callee()             call Callee()             call Callee()             call Callee()             call Callee()
+Callee():                 Callee():                 Callee():                 Callee():                 Callee():
+  nop                       xor eax, eax              sub rsp, 0x28             sub rsp, 0x28             sub rsp, 0x28
+  xor eax, eax              push eax                  nop                       nop                       nop
+  ret                       push eax                  xor rax, rax              xor rax, rax              xor rax, rax
+                            push eax                  add rsp, 0x28             add rsp, 0x28             add rsp, 0x28
+                            nop                       ret                       ret                       ret
+                            xor eax, eax
+                            add esp, 0xc
+                            ret
+
+1 parameter:
+Code:
+WIN-x86                   LNX-x86                   WIN-x64                   LNX-x64                   MAC-x64
+  push dword 0x1            sub esp, 0xc              mov rcx, 0x1              push dword 0x1            mov rax, 0x1
+  call Callee()             push dword 0x1            call Callee()             pop rdi                   push rax
+Callee():                   call Callee()           Callee():                   call Callee()             pop rdi
+  mov edx, [esp+0x4]        add esp, 0xc              mov [rsp+0x8], rcx      Callee():                   call Callee()
+  xor eax, eax            Callee():                   sub rsp, 0x28             xor rax, rax            Callee():
+  ret 0x4                   xor eax, eax              mov rdx, [rsp+0x30]       push rax                  xor rax, rax
+                            push eax                  xor rax, rax              push rax                  push rax
+                            push eax                  add rsp, 0x28             sub rsp, 0x28             push rax
+                            push eax                  ret                       mov rax, rdi              sub rsp, 0x28
+                            mov edx, [esp+0x10]                                 mov [rsp+0x28], rax       mov rax, rdi
+                            xor eax, eax                                        mov rdx, [rsp+0x28]       mov [rsp+0x28], rax
+                            add esp, 0xc                                        xor rax, rax              mov rdx, [rsp+0x28]
+                            ret 0x4                                             add rsp, 0x38             xor rax, rax
+                                                                                ret                       add rsp, 0x38
+                                                                                                          ret
+
+2 parameters:
+Code:
+WIN-x86                   LNX-x86                   WIN-x64                   LNX-x64                   MAC-x64
+  push dword 0x2            sub esp, 0x8              mov rdx, 0x2              push dword 0x2            mov rax, 0x2
+  push dword 0x1            push dword 0x2            mov rcx, 0x1              push dword 0x1            push rax
+  call Callee()             push dword 0x1            call Callee()             pop rdi                   mov rax, 0x1
+Callee():                   call Callee()           Callee():                   pop rsi                   push rax
+  mov edx, [esp+0x4]        add esp, 0x8              mov [rsp+0x8], rcx        call Callee()             pop rdi
+  mov edx, [esp+0x8]      Callee():                   mov [rsp+0x10], rdx     Callee():                   pop rsi
+  xor eax, eax              xor eax, eax              sub rsp, 0x28             xor rax, rax              call Callee()
+  ret 0x8                   push eax                  mov rdx, [rsp+0x30]       push rax                Callee():
+                            push eax                  mov rdx, [rsp+0x38]       push rax                  xor rax, rax
+                            push eax                  xor rax, rax              sub rsp, 0x28             push rax
+                            mov edx, [esp+0x10]       add rsp, 0x28             mov rax, rdi              push rax
+                            mov edx, [esp+0x14]       ret                       mov [rsp+0x28], rax       sub rsp, 0x28
+                            xor eax, eax                                        mov rax, rsi              mov rax, rdi
+                            add esp, 0xc                                        mov [rsp+0x30], rax       mov [rsp+0x28], rax
+                            ret 0x8                                             mov rdx, [rsp+0x28]       mov rax, rsi
+                                                                                mov rdx, [rsp+0x30]       mov [rsp+0x30], rax
+                                                                                xor rax, rax              mov rdx, [rsp+0x28]
+                                                                                add rsp, 0x38             mov rdx, [rsp+0x30]
+                                                                                ret                       xor rax, rax
+                                                                                                          add rsp, 0x38
+                                                                                                          ret
+
+3 parameters:
+Code:
+WIN-x86                   LNX-x86                   WIN-x64                   LNX-x64                   MAC-x64
+  push dword 0x3            sub esp, 0x4              mov r8, 0x3               push dword 0x3            mov rax, 0x3
+  push dword 0x2            push dword 0x3            mov rdx, 0x2              push dword 0x2            push rax
+  push dword 0x1            push dword 0x2            mov rcx, 0x1              push dword 0x1            mov rax, 0x2
+  call Callee()             push dword 0x1            call Callee()             pop rdi                   push rax
+Callee():                   call Callee()           Callee():                   pop rsi                   mov rax, 0x1
+  mov edx, [esp+0x4]        add esp, 0x4              mov [rsp+0x8], rcx        pop rdx                   push rax
+  mov edx, [esp+0x8]      Callee():                   mov [rsp+0x10], rdx       call Callee()             pop rdi
+  mov edx, [esp+0xc]        xor eax, eax              mov [rsp+0x18], r8      Callee():                   pop rsi
+  xor eax, eax              push eax                  sub rsp, 0x28             xor rax, rax              pop rdx
+  ret 0xc                   push eax                  mov rdx, [rsp+0x30]       push rax                  call Callee()
+                            push eax                  mov rdx, [rsp+0x38]       push rax                Callee():
+                            mov edx, [esp+0x10]       mov rdx, [rsp+0x40]       push rax                  xor rax, rax
+                            mov edx, [esp+0x14]       xor rax, rax              push rax                  push rax
+                            mov edx, [esp+0x18]       add rsp, 0x28             sub rsp, 0x28             push rax
+                            xor eax, eax              ret                       mov rax, rdi              push rax
+                            add esp, 0xc                                        mov [rsp+0x28], rax       push rax
+                            ret 0xc                                             mov rax, rsi              sub rsp, 0x28
+                                                                                mov [rsp+0x30], rax       mov rax, rdi
+                                                                                mov rax, rdx              mov [rsp+0x28], rax
+                                                                                mov [rsp+0x38], rax       mov rax, rsi
+                                                                                mov rdx, [rsp+0x28]       mov [rsp+0x30], rax
+                                                                                mov rdx, [rsp+0x30]       mov rax, rdx
+                                                                                mov rdx, [rsp+0x38]       mov [rsp+0x38], rax
+                                                                                xor rax, rax              mov rdx, [rsp+0x28]
+                                                                                add rsp, 0x48             mov rdx, [rsp+0x30]
+                                                                                ret                       mov rdx, [rsp+0x38]
+                                                                                                          xor rax, rax
+                                                                                                          add rsp, 0x48
+                                                                                                          ret
+
+4 parameters:
+Code:
+WIN-x86                   LNX-x86                   WIN-x64                   LNX-x64                   MAC-x64
+  push dword 0x4            push dword 0x4            mov r9, 0x4               push dword 0x4            mov rax, 0x4
+  push dword 0x3            push dword 0x3            mov r8, 0x3               push dword 0x3            push rax
+  push dword 0x2            push dword 0x2            mov rdx, 0x2              push dword 0x2            mov rax, 0x3
+  push dword 0x1            push dword 0x1            mov rcx, 0x1              push dword 0x1            push rax
+  call Callee()             call Callee()             call Callee()             pop rdi                   mov rax, 0x2
+Callee():                 Callee():                 Callee():                   pop rsi                   push rax
+  mov edx, [esp+0x4]        xor eax, eax              mov [rsp+0x8], rcx        pop rdx                   mov rax, 0x1
+  mov edx, [esp+0x8]        push eax                  mov [rsp+0x10], rdx       pop rcx                   push rax
+  mov edx, [esp+0xc]        push eax                  mov [rsp+0x18], r8        call Callee()             pop rdi
+  mov edx, [esp+0x10]       push eax                  mov [rsp+0x20], r9      Callee():                   pop rsi
+  xor eax, eax              mov edx, [esp+0x10]       sub rsp, 0x28             xor rax, rax              pop rdx
+  ret 0x10                  mov edx, [esp+0x14]       mov rdx, [rsp+0x30]       push rax                  pop rcx
+                            mov edx, [esp+0x18]       mov rdx, [rsp+0x38]       push rax                  call Callee()
+                            mov edx, [esp+0x1c]       mov rdx, [rsp+0x40]       push rax                Callee():
+                            xor eax, eax              mov rdx, [rsp+0x48]       push rax                  xor rax, rax
+                            add esp, 0xc              xor rax, rax              sub rsp, 0x28             push rax
+                            ret 0x10                  add rsp, 0x28             mov rax, rdi              push rax
+                                                      ret                       mov [rsp+0x28], rax       push rax
+                                                                                mov rax, rsi              push rax
+                                                                                mov [rsp+0x30], rax       sub rsp, 0x28
+                                                                                mov rax, rdx              mov rax, rdi
+                                                                                mov [rsp+0x38], rax       mov [rsp+0x28], rax
+                                                                                mov rax, rcx              mov rax, rsi
+                                                                                mov [rsp+0x40], rax       mov [rsp+0x30], rax
+                                                                                mov rdx, [rsp+0x28]       mov rax, rdx
+                                                                                mov rdx, [rsp+0x30]       mov [rsp+0x38], rax
+                                                                                mov rdx, [rsp+0x38]       mov rax, rcx
+                                                                                mov rdx, [rsp+0x40]       mov [rsp+0x40], rax
+                                                                                xor rax, rax              mov rdx, [rsp+0x28]
+                                                                                add rsp, 0x48             mov rdx, [rsp+0x30]
+                                                                                ret                       mov rdx, [rsp+0x38]
+                                                                                                          mov rdx, [rsp+0x40]
+                                                                                                          xor rax, rax
+                                                                                                          add rsp, 0x48
+                                                                                                          ret
+
+5 parameters:
+Code:
+WIN-x86                   LNX-x86                   WIN-x64                   LNX-x64                   MAC-x64
+  push dword 0x5            sub esp, 0xc              sub rsp, 0x8              push dword 0x5            mov rax, 0x5
+  push dword 0x4            push dword 0x5            push dword 0x5            push dword 0x4            push rax
+  push dword 0x3            push dword 0x4            mov r9, 0x4               push dword 0x3            mov rax, 0x4
+  push dword 0x2            push dword 0x3            mov r8, 0x3               push dword 0x2            push rax
+  push dword 0x1            push dword 0x2            mov rdx, 0x2              push dword 0x1            mov rax, 0x3
+  call Callee()             push dword 0x1            mov rcx, 0x1              pop rdi                   push rax
+Callee():                   call Callee()             sub rsp, 0x20             pop rsi                   mov rax, 0x2
+  mov edx, [esp+0x4]        add esp, 0xc              call Callee()             pop rdx                   push rax
+  mov edx, [esp+0x8]      Callee():                   add rsp, 0x30             pop rcx                   mov rax, 0x1
+  mov edx, [esp+0xc]        xor eax, eax            Callee():                   pop r8                    push rax
+  mov edx, [esp+0x10]       push eax                  mov [rsp+0x8], rcx        call Callee()             pop rdi
+  mov edx, [esp+0x14]       push eax                  mov [rsp+0x10], rdx     Callee():                   pop rsi
+  xor eax, eax              push eax                  mov [rsp+0x18], r8        xor rax, rax              pop rdx
+  ret 0x14                  mov edx, [esp+0x10]       mov [rsp+0x20], r9        push rax                  pop rcx
+                            mov edx, [esp+0x14]       sub rsp, 0x28             push rax                  pop r8
+                            mov edx, [esp+0x18]       mov rdx, [rsp+0x30]       push rax                  call Callee()
+                            mov edx, [esp+0x1c]       mov rdx, [rsp+0x38]       push rax                Callee():
+                            mov edx, [esp+0x20]       mov rdx, [rsp+0x40]       push rax                  xor rax, rax
+                            xor eax, eax              mov rdx, [rsp+0x48]       push rax                  push rax
+                            add esp, 0xc              mov rdx, [rsp+0x50]       sub rsp, 0x28             push rax
+                            ret 0x14                  xor rax, rax              mov rax, rdi              push rax
+                                                      add rsp, 0x28             mov [rsp+0x28], rax       push rax
+                                                      ret                       mov rax, rsi              push rax
+                                                                                mov [rsp+0x30], rax       push rax
+                                                                                mov rax, rdx              sub rsp, 0x28
+                                                                                mov [rsp+0x38], rax       mov rax, rdi
+                                                                                mov rax, rcx              mov [rsp+0x28], rax
+                                                                                mov [rsp+0x40], rax       mov rax, rsi
+                                                                                mov rax, r8               mov [rsp+0x30], rax
+                                                                                mov [rsp+0x48], rax       mov rax, rdx
+                                                                                mov rdx, [rsp+0x28]       mov [rsp+0x38], rax
+                                                                                mov rdx, [rsp+0x30]       mov rax, rcx
+                                                                                mov rdx, [rsp+0x38]       mov [rsp+0x40], rax
+                                                                                mov rdx, [rsp+0x40]       mov rax, r8
+                                                                                mov rdx, [rsp+0x48]       mov [rsp+0x48], rax
+                                                                                xor rax, rax              mov rdx, [rsp+0x28]
+                                                                                add rsp, 0x58             mov rdx, [rsp+0x30]
+                                                                                ret                       mov rdx, [rsp+0x38]
+                                                                                                          mov rdx, [rsp+0x40]
+                                                                                                          mov rdx, [rsp+0x48]
+                                                                                                          xor rax, rax
+                                                                                                          add rsp, 0x58
+                                                                                                          ret
+
+6 parameters:
+Code:
+WIN-x86                   LNX-x86                   WIN-x64                   LNX-x64                   MAC-x64
+  push dword 0x6            sub esp, 0x8              push dword 0x6            push dword 0x6            mov rax, 0x6
+  push dword 0x5            push dword 0x6            push dword 0x5            push dword 0x5            push rax
+  push dword 0x4            push dword 0x5            mov r9, 0x4               push dword 0x4            mov rax, 0x5
+  push dword 0x3            push dword 0x4            mov r8, 0x3               push dword 0x3            push rax
+  push dword 0x2            push dword 0x3            mov rdx, 0x2              push dword 0x2            mov rax, 0x4
+  push dword 0x1            push dword 0x2            mov rcx, 0x1              push dword 0x1            push rax
+  call Callee()             push dword 0x1            sub rsp, 0x20             pop rdi                   mov rax, 0x3
+Callee():                   call Callee()             call Callee()             pop rsi                   push rax
+  mov edx, [esp+0x4]        add esp, 0x8              add rsp, 0x30             pop rdx                   mov rax, 0x2
+  mov edx, [esp+0x8]      Callee():                 Callee():                   pop rcx                   push rax
+  mov edx, [esp+0xc]        xor eax, eax              mov [rsp+0x8], rcx        pop r8                    mov rax, 0x1
+  mov edx, [esp+0x10]       push eax                  mov [rsp+0x10], rdx       pop r9                    push rax
+  mov edx, [esp+0x14]       push eax                  mov [rsp+0x18], r8        call Callee()             pop rdi
+  mov edx, [esp+0x18]       push eax                  mov [rsp+0x20], r9      Callee():                   pop rsi
+  xor eax, eax              mov edx, [esp+0x10]       sub rsp, 0x28             xor rax, rax              pop rdx
+  ret 0x18                  mov edx, [esp+0x14]       mov rdx, [rsp+0x30]       push rax                  pop rcx
+                            mov edx, [esp+0x18]       mov rdx, [rsp+0x38]       push rax                  pop r8
+                            mov edx, [esp+0x1c]       mov rdx, [rsp+0x40]       push rax                  pop r9
+                            mov edx, [esp+0x20]       mov rdx, [rsp+0x48]       push rax                  call Callee()
+                            mov edx, [esp+0x24]       mov rdx, [rsp+0x50]       push rax                Callee():
+                            xor eax, eax              mov rdx, [rsp+0x58]       push rax                  xor rax, rax
+                            add esp, 0xc              xor rax, rax              sub rsp, 0x28             push rax
+                            ret 0x18                  add rsp, 0x28             mov rax, rdi              push rax
+                                                      ret                       mov [rsp+0x28], rax       push rax
+                                                                                mov rax, rsi              push rax
+                                                                                mov [rsp+0x30], rax       push rax
+                                                                                mov rax, rdx              push rax
+                                                                                mov [rsp+0x38], rax       sub rsp, 0x28
+                                                                                mov rax, rcx              mov rax, rdi
+                                                                                mov [rsp+0x40], rax       mov [rsp+0x28], rax
+                                                                                mov rax, r8               mov rax, rsi
+                                                                                mov [rsp+0x48], rax       mov [rsp+0x30], rax
+                                                                                mov rax, r9               mov rax, rdx
+                                                                                mov [rsp+0x50], rax       mov [rsp+0x38], rax
+                                                                                mov rdx, [rsp+0x28]       mov rax, rcx
+                                                                                mov rdx, [rsp+0x30]       mov [rsp+0x40], rax
+                                                                                mov rdx, [rsp+0x38]       mov rax, r8
+                                                                                mov rdx, [rsp+0x40]       mov [rsp+0x48], rax
+                                                                                mov rdx, [rsp+0x48]       mov rax, r9
+                                                                                mov rdx, [rsp+0x50]       mov [rsp+0x50], rax
+                                                                                xor rax, rax              mov rdx, [rsp+0x28]
+                                                                                add rsp, 0x58             mov rdx, [rsp+0x30]
+                                                                                ret                       mov rdx, [rsp+0x38]
+                                                                                                          mov rdx, [rsp+0x40]
+                                                                                                          mov rdx, [rsp+0x48]
+                                                                                                          mov rdx, [rsp+0x50]
+                                                                                                          xor rax, rax
+                                                                                                          add rsp, 0x58
+                                                                                                          ret
+
+7 parameters:
+Code:
+WIN-x86                   LNX-x86                   WIN-x64                   LNX-x64                   MAC-x64
+  push dword 0x7            sub esp, 0x4              sub rsp, 0x8              sub rsp, 0x8              sub rsp, 0x8
+  push dword 0x6            push dword 0x7            push dword 0x7            push dword 0x7            mov rax, 0x7
+  push dword 0x5            push dword 0x6            push dword 0x6            push dword 0x6            push rax
+  push dword 0x4            push dword 0x5            push dword 0x5            push dword 0x5            mov rax, 0x6
+  push dword 0x3            push dword 0x4            mov r9, 0x4               push dword 0x4            push rax
+  push dword 0x2            push dword 0x3            mov r8, 0x3               push dword 0x3            mov rax, 0x5
+  push dword 0x1            push dword 0x2            mov rdx, 0x2              push dword 0x2            push rax
+  call Callee()             push dword 0x1            mov rcx, 0x1              push dword 0x1            mov rax, 0x4
+Callee():                   call Callee()             sub rsp, 0x20             pop rdi                   push rax
+  mov edx, [esp+0x4]        add esp, 0x4              call Callee()             pop rsi                   mov rax, 0x3
+  mov edx, [esp+0x8]      Callee():                   add rsp, 0x40             pop rdx                   push rax
+  mov edx, [esp+0xc]        xor eax, eax            Callee():                   pop rcx                   mov rax, 0x2
+  mov edx, [esp+0x10]       push eax                  mov [rsp+0x8], rcx        pop r8                    push rax
+  mov edx, [esp+0x14]       push eax                  mov [rsp+0x10], rdx       pop r9                    mov rax, 0x1
+  mov edx, [esp+0x18]       push eax                  mov [rsp+0x18], r8        call Callee()             push rax
+  mov edx, [esp+0x1c]       mov edx, [esp+0x10]       mov [rsp+0x20], r9        add rsp, 0x10             pop rdi
+  xor eax, eax              mov edx, [esp+0x14]       sub rsp, 0x28           Callee():                   pop rsi
+  ret 0x1c                  mov edx, [esp+0x18]       mov rdx, [rsp+0x30]       mov rax, 0x8              pop rdx
+                            mov edx, [esp+0x1c]       mov rdx, [rsp+0x38]       sub rsp, 0x8              pop rcx
+                            mov edx, [esp+0x20]       mov rdx, [rsp+0x40]       mov qword [rsp], 0x0      pop r8
+                            mov edx, [esp+0x24]       mov rdx, [rsp+0x48]       invalid                   pop r9
+                            mov edx, [esp+0x28]       mov rdx, [rsp+0x50]                                 call Callee()
+                            xor eax, eax              mov rdx, [rsp+0x58]                                 add rsp, 0x10
+                            add esp, 0xc              mov rdx, [rsp+0x60]                               Callee():
+                            ret 0x1c                  xor rax, rax                                        mov rax, 0x8
+                                                      add rsp, 0x28                                       ClearLoop:
+                                                      ret                                                 sub rsp, 0x8
+                                                                                                          mov qword [rsp+ret_addr], 0x0
+                                                                                                          dec rax
+                                                                                                          jne ClearLoop
+                                                                                                          sub rsp, 0x28
+                                                                                                          mov rax, rdi
+                                                                                                          mov [rsp+0x20], rax
+                                                                                                          mov rax, rsi
+                                                                                                          mov [rsp+0x28], rax
+                                                                                                          mov rax, rdx
+                                                                                                          mov [rsp+0x30], rax
+                                                                                                          mov rax, rcx
+                                                                                                          mov [rsp+0x38], rax
+                                                                                                          mov rax, r8
+                                                                                                          mov [rsp+0x40], rax
+                                                                                                          mov rax, r9
+                                                                                                          mov [rsp+0x48], rax
+                                                                                                          mov rax, [rsp+0x68]
+                                                                                                          mov [rsp+0x50], rax
+                                                                                                          mov rdx, [rsp+0x20]
+                                                                                                          mov rdx, [rsp+0x30]
+                                                                                                          mov rdx, [rsp+0x38]
+                                                                                                          mov rdx, [rsp+0x40]
+                                                                                                          mov rdx, [rsp+0x48]
+                                                                                                          mov rdx, [rsp+0x50]
+                                                                                                          xor rax, rax
+                                                                                                          add rsp, 0x68
+                                                                                                          ret
+
