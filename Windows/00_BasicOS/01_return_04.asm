@@ -1,5 +1,5 @@
 ; 01_return_04.asm
-; - replace indirect call pointers with names (rip-relative addresses)
+; - Replace hard-coded rip-relative address with reference to label
 
 format binary as "exe" 
 org 0 
@@ -32,12 +32,6 @@ macro print_value_x32 description, value
 macro align_section
 {
   db (((($+(FILE_ALIGNMENT-1))/FILE_ALIGNMENT)*FILE_ALIGNMENT)-$) dup (0)
-}
-
-macro call_indirect target
-{
-  call qword [ rip + (target-((@f-CODE)+CODE.RVA))  ]
-  @@:
 }
 
 IMAGE_DOS_HEADER:
@@ -302,7 +296,8 @@ start.RVA = (start-CODE)+CODE.RVA
   mov    eax,0x2a            ; db 0xb8, 0x2a, 0x00, 0x00, 0x00
   sub    rsp,0x20            ; db 0x48, 0x83, 0xec, 0x20
   mov    ecx,eax             ; db 0x89, 0xc1
-  call_indirect ExitProcess  ; db 0xff, 0x15, 0x37, 0x10, 0x00, 0x00
+  call qword [ rip + (ExitProcess-((@f-CODE)+CODE.RVA))  ] ; db 0xff, 0x15, 0x37, 0x10, 0x00, 0x00
+  @@:
   add    rsp,0x20            ; db 0x48, 0x83, 0xc4, 0x20
 
 CODE_END:

@@ -1,8 +1,8 @@
 ; 01_return_02.asm
-; - automatic alignment paddng
-; - label pointers and sizes
-; - zero checksum, timestamp
-; - replace hex with strings
+;   1. Automatic alignment paddng
+;   2. Zero checksum, timestamp
+;   3. Replace hex with strings
+;   4. Replace some pointers with labels
 
 format binary as "exe" 
 org 0 

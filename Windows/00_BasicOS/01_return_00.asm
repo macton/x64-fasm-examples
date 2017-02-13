@@ -1,3 +1,10 @@
+; 1. assemble 01_return.asm
+; 2. convert 01_return.exe to hex below
+; 3. validate it works:
+; fasm 01_return_00.asm
+; ./01_return_00.exe
+; echo $?
+
 format binary as "exe" 
 org 0 
 use64 
