@@ -217,7 +217,7 @@ SECTION_TABLE:
 SECTION_TABLE_ENTRY_CODE:
 
   db '.code',0,0,0                                  ; char Name[8]
-  dd CODE_SIZE                                      ; u32  VirtualSize
+  dd CODE_IMAGE_SIZE                                ; u32  VirtualSize
   dd CODE.RVA                                       ; u32  VirtualAddress
   dd CODE_FILE_SIZE                                 ; u32  SizeOfRawData
   dd CODE                                           ; u32  PointerToRawData
@@ -234,7 +234,7 @@ assert (SECTION_TABLE_ENTRY_CODE_SIZE = 0x28)
 SECTION_TABLE_ENTRY_IDATA:
 
   db '.idata',0,0                                   ; char Name[8]
-  dd IDATA_SIZE                                     ; u32  VirtualSize
+  dd IDATA_IMAGE_SIZE                               ; u32  VirtualSize
   dd IDATA.RVA                                      ; u32  VirtualAddress
   dd IDATA_FILE_SIZE                                ; u32  SizeOfRawData
   dd IDATA                                          ; u32  PointerToRawData

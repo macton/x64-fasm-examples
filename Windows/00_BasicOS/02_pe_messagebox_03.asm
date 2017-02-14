@@ -99,8 +99,7 @@ IMAGE_OPTIONAL_HEADER:
   db 0x0b, 0x02                                     ; u16 Magic
   db 0x01                                           ; u8  MajorLinkerVersion
   db 0x47                                           ; u8  MinorLinkerVersion
-  ; dd CODE_SIZE                                      ; u32 SizeOfCode
-  dd CODE_IMAGE_SIZE                                ; u32 SizeOfCode
+  dd CODE_SIZE                                      ; u32 SizeOfCode
   dd 0                                              ; u32 SizeofInitializedData (unused)
   dd 0                                              ; u32 SizeOfUninitializedData (unused)
   dd start.RVA                                      ; u32 AddressOfEntryPoint

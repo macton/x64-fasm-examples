@@ -195,7 +195,7 @@ SECTION_TABLE:
 SECTION_TABLE_ENTRY_CODE:
 
   db '.code',0,0,0                                  ; char Name[8]
-  dd CODE_SIZE                                      ; u32  VirtualSize
+  dd CODE_IMAGE_SIZE                                ; u32  VirtualSize
   dd CODE.RVA                                       ; u32  VirtualAddress
   dd CODE_SIZE                                      ; u32  SizeOfRawData
   dd CODE                                           ; u32  PointerToRawData

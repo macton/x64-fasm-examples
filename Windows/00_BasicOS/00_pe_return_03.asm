@@ -152,7 +152,7 @@ IMAGE_DIRECTORY_ENTRY_EXPORT:
 IMAGE_DIRECTORY_ENTRY_IMPORT:
 
   dd IDATA.RVA  ; u32 VirtualAddress
-  dd IDATA_SIZE ; u32 Size
+  dd IDATA.SIZE ; u32 Size
 
 IMAGE_DIRECTORY_ENTRY_RESOURCE:
 
@@ -237,7 +237,7 @@ print_value_x32 "SECTION_TABLE                     = ", SECTION_TABLE
 SECTION_TABLE_ENTRY_CODE:
 
   db '.code',0,0,0                                  ; char Name[8]
-  dd CODE_SIZE                                      ; u32  VirtualSize
+  dd CODE_IMAGE_SIZE                                ; u32  VirtualSize
   dd CODE.RVA                                       ; u32  VirtualAddress
   dd CODE_FILE_SIZE                                 ; u32  SizeOfRawData
   dd CODE                                           ; u32  PointerToRawData
@@ -248,13 +248,13 @@ SECTION_TABLE_ENTRY_CODE:
   db 0x20, 0x00, 0x00, 0x60                         ; u32  Characteristics
 
 SECTION_TABLE_ENTRY_CODE_END:
-SECTION_TABLE_ENTRY_CODE_SIZE = SECTION_TABLE_ENTRY_CODE_END - SECTION_TABLE_ENTRY_CODE
-assert (SECTION_TABLE_ENTRY_CODE_SIZE = 0x28)
+SECTION_TABLE_ENTRY_CODE.SIZE = SECTION_TABLE_ENTRY_CODE_END - SECTION_TABLE_ENTRY_CODE
+assert (SECTION_TABLE_ENTRY_CODE.SIZE = 0x28)
 
 SECTION_TABLE_ENTRY_IDATA:
 
   db '.idata',0,0                                   ; char Name[8]
-  dd IDATA_SIZE                                     ; u32  VirtualSize
+  dd IDATA_IMAGE_SIZE                               ; u32  VirtualSize
   dd IDATA.RVA                                      ; u32  VirtualAddress
   dd IDATA_FILE_SIZE                                ; u32  SizeOfRawData
   dd IDATA                                          ; u32  PointerToRawData
@@ -265,8 +265,8 @@ SECTION_TABLE_ENTRY_IDATA:
   db 0x40, 0x00, 0x00, 0xc0                         ; u32  Characteristics
 
 SECTION_TABLE_ENTRY_IDATA_END:
-SECTION_TABLE_ENTRY_IDATA_SIZE = SECTION_TABLE_ENTRY_IDATA_END - SECTION_TABLE_ENTRY_IDATA
-assert (SECTION_TABLE_ENTRY_IDATA_SIZE = 0x28)
+SECTION_TABLE_ENTRY_IDATA.SIZE = SECTION_TABLE_ENTRY_IDATA_END - SECTION_TABLE_ENTRY_IDATA
+assert (SECTION_TABLE_ENTRY_IDATA.SIZE = 0x28)
 
 SECTION_TABLE_END:
 SECTION_TABLE_SIZE = SECTION_TABLE_END-SECTION_TABLE
@@ -317,9 +317,9 @@ start.RVA = (start-CODE)+CODE.RVA
   db 0x20
 
 CODE_END:
-CODE_SIZE = CODE_END-CODE
+CODE.SIZE = CODE_END-CODE
 
-print_value_x32 "CODE_SIZE                         = ", CODE_SIZE
+print_value_x32 "CODE.SIZE                         = ", CODE.SIZE
 
 CODE_PADDING:
   align_section
@@ -407,8 +407,8 @@ IMPORT_NAMES_PADDING:
   align 8
 
 IDATA_END:
-IDATA_SIZE = IDATA_END-IDATA
-print_value_x32 "IDATA_SIZE                        = ", IDATA_SIZE
+IDATA.SIZE = IDATA_END-IDATA
+print_value_x32 "IDATA.SIZE                        = ", IDATA.SIZE
 
 IDATA_PADDING:
   align_section
@@ -423,7 +423,7 @@ print_value_x32 "IDATA_IMAGE_SIZE                  = ", IDATA_IMAGE_SIZE
 
 ; SizeOfImage = Sum of sizes of all in-memory sections (aligned)
 ; Here, IDATA is the last section
-IMAGE_SIZE = IDATA.RVA + (((IDATA_SIZE+(SECTION_ALIGNMENT-1))/SECTION_ALIGNMENT)*SECTION_ALIGNMENT)
+IMAGE_SIZE = IDATA.RVA + (((IDATA.SIZE+(SECTION_ALIGNMENT-1))/SECTION_ALIGNMENT)*SECTION_ALIGNMENT)
 print_value_x32 "IMAGE_SIZE                        = ", IMAGE_SIZE
 
 FILE_END:
