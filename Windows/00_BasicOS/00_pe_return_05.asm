@@ -1,5 +1,5 @@
-; 01_return_03.asm
-;   1. Disassemble code at start
+; 00_return_05.asm
+; - Replace hard-coded rip-relative address with reference to label
 
 format binary as "exe" 
 org 0 
@@ -12,6 +12,7 @@ STACK_RESERVE_SIZE = 0x0000000000001000
 STACK_COMMIT_SIZE  = 0x0000000000001000
 HEAP_RESERVE_SIZE  = 0x0000000000010000
 HEAP_COMMIT_SIZE   = 0x0000000000000000
+CODE_BASE          = CODE.RVA
 
 macro print_value_x32 description, value
 {
@@ -116,7 +117,7 @@ print_value_x32 "IMAGE_OPTIONAL_HEADER             = ", IMAGE_OPTIONAL_HEADER
   dd 0                                              ; u32 SizeofInitializedData (unused)
   dd 0                                              ; u32 SizeOfUninitializedData (unused)
   dd start.RVA                                      ; u32 AddressOfEntryPoint
-  dd CODE.RVA                                       ; u32 BaseOfCode
+  dd CODE_BASE                                      ; u32 BaseOfCode
   dq IMAGE_BASE                                     ; u64 ImageBase
   dd SECTION_ALIGNMENT                              ; u32 SectionAlignment
   dd FILE_ALIGNMENT                                 ; u32 FileAlignment
@@ -295,7 +296,8 @@ start.RVA = (start-CODE)+CODE.RVA
   mov    eax,0x2a            ; db 0xb8, 0x2a, 0x00, 0x00, 0x00
   sub    rsp,0x20            ; db 0x48, 0x83, 0xec, 0x20
   mov    ecx,eax             ; db 0x89, 0xc1
-  call   qword [rip+0x1037]  ; db 0xff, 0x15, 0x37, 0x10, 0x00, 0x00
+  call qword [ rip + (ExitProcess-((@f-CODE)+CODE.RVA))  ] ; db 0xff, 0x15, 0x37, 0x10, 0x00, 0x00
+  @@:
   add    rsp,0x20            ; db 0x48, 0x83, 0xc4, 0x20
 
 CODE_END:
@@ -369,6 +371,7 @@ KERNEL32_IMPORT_ADDRESS_TABLE.RVA = (KERNEL32_IMPORT_ADDRESS_TABLE-IDATA)+IDATA.
 print_value_x32 "KERNEL32_IMPORT_ADDRESS_TABLE     = ", KERNEL32_IMPORT_ADDRESS_TABLE
 print_value_x32 "KERNEL32_IMPORT_ADDRESS_TABLE RVA = ", KERNEL32_IMPORT_ADDRESS_TABLE.RVA
 
+  ExitProcess = ($-IDATA)+IDATA.RVA ; RVA
   dq IMPORT_NAMES.ExitProcess.RVA
   dq 0 ; END
 

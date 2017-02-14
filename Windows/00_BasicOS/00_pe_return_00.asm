@@ -1,4 +1,4 @@
-; 01_return.asm
+; 00_pe_return.asm
 ; Simple fasm example. Returns 42.
 ;   - Why 42? Check out: http://www.muppetlabs.com/~breadbox/software/tiny/return42.html
 

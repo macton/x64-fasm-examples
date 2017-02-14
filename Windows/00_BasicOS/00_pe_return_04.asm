@@ -1,8 +1,5 @@
-; 01_return_02.asm
-;   1. Automatic alignment paddng
-;   2. Zero checksum, timestamp
-;   3. Replace hex with strings
-;   4. Replace some pointers with labels
+; 00_return_04.asm
+;   1. Disassemble code at start
 
 format binary as "exe" 
 org 0 
@@ -294,27 +291,12 @@ print_value_x32 "CODE RVA                          = ", CODE.RVA
 
 start:
 start.RVA = (start-CODE)+CODE.RVA
-  db 0xb8
-  db 0x2a
-  db 0x00
-  db 0x00
-  db 0x00
-  db 0x48
-  db 0x83
-  db 0xec
-  db 0x20
-  db 0x89
-  db 0xc1
-  db 0xff
-  db 0x15
-  db 0x37
-  db 0x10
-  db 0x00
-  db 0x00
-  db 0x48
-  db 0x83
-  db 0xc4
-  db 0x20
+
+  mov    eax,0x2a            ; db 0xb8, 0x2a, 0x00, 0x00, 0x00
+  sub    rsp,0x20            ; db 0x48, 0x83, 0xec, 0x20
+  mov    ecx,eax             ; db 0x89, 0xc1
+  call   qword [rip+0x1037]  ; db 0xff, 0x15, 0x37, 0x10, 0x00, 0x00
+  add    rsp,0x20            ; db 0x48, 0x83, 0xc4, 0x20
 
 CODE_END:
 CODE_SIZE = CODE_END-CODE
